@@ -1,4 +1,4 @@
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +17,9 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddControllers();
 var app = builder.Build();
 
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
