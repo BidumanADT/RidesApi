@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using RidesApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,5 @@ app.MapGet("/api/rides", [Authorize] () =>
       new Ride(DateTime.UtcNow.AddDays(-1), 7.8)
     };
 });
-
-record Ride(DateTime Date, double Distance);
 
 app.Run();
