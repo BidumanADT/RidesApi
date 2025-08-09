@@ -1,28 +1,41 @@
+// Program.cs
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using RidesApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) Add controllers
-builder.Services.AddControllers();
+// 1) Use the same signing key setup as AuthServer:
+var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("super-long-jwt-signing-secret-1234"));
 
-// 2) Protect with JWT tokens issued by your AuthServer
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = "https://localhost:5001"; 
-        options.Audience = "ride.api"; 
-        options.RequireHttpsMetadata = false;    // dev only
-    });
+  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(options =>
+  {
+      options.TokenValidationParameters = new()
+      {
+          ValidateIssuer = false,
+          ValidateAudience = false,
+          ValidateLifetime = true,
+          IssuerSigningKey = key
+      };
+  });
 
 builder.Services.AddAuthorization();
-
-builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+// 2) A protected GET /api/rides
+app.MapGet("/api/rides", [Authorize] () =>
+{
+    return new[]
+    {
+      new Ride(DateTime.UtcNow, 12.3),
+      new Ride(DateTime.UtcNow.AddDays(-1), 7.8)
+    };
+});
 
 app.Run();
