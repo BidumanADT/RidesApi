@@ -5,6 +5,8 @@ using RidesApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseUrls("https://localhost:5005", "http://localhost:5004");
+
 // Read the signing key from config (fallback to your current dev key)
 var jwtKey = builder.Configuration["Jwt:Key"]
              ?? "super-long-jwt-signing-secret-1234";
