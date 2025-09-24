@@ -45,14 +45,31 @@ app.UseAuthorization();
 
 // Simple health check
 app.MapGet("/healthz", () => Results.Ok("ok"));
+app.MapGet("/health", () => Results.Ok("ok"));
 
-// Protected endpoint
+
+// Protected endpoint returning UI-friendly shape
 app.MapGet("/api/rides", () =>
 {
+    var now = DateTime.Now; // local time looks nicer in UI; use Utc if you prefer
     var data = new[]
     {
-        new Ride(DateTime.UtcNow,         12.3),
-        new Ride(DateTime.UtcNow.AddDays(-1), 7.8)
+        new RideListItem(
+            Id: "R-1001",
+            PickupTime: now.AddHours(-2),
+            PickupAddress: "O'Hare International Airport, Chicago, IL",
+            DropoffAddress: "The Langham, Chicago, IL",
+            Status: "Completed",
+            Price: 86.50m
+        ),
+        new RideListItem(
+            Id: "R-1002",
+            PickupTime: now.AddDays(-1).AddHours(-3),
+            PickupAddress: "Midway International Airport, Chicago, IL",
+            DropoffAddress: "Aon Center, Chicago, IL",
+            Status: "Completed",
+            Price: 64.00m
+        )
     };
     return Results.Ok(data);
 })
