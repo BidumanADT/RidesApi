@@ -1,7 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using RidesApi.Models; 
+using RidesApi.Models;
+using System.Collections.Concurrent;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +74,33 @@ app.MapGet("/api/rides", () =>
         )
     };
     return Results.Ok(data);
+})
+.RequireAuthorization();
+
+// In-memory store (dev only)
+var ridesStore = new ConcurrentDictionary<string, RideListItem>();
+
+app.MapPost("/api/rides", (RideCreate req) =>
+{
+    var id = $"R-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}";
+    var item = new RideListItem(
+        Id: id,
+        PickupTime: req.PickupTime == default ? DateTime.Now : req.PickupTime,
+        PickupAddress: req.PickupAddress ?? "Unknown pickup",
+        DropoffAddress: req.DropoffAddress ?? "Unknown dropoff",
+        Status: "Created",
+        Price: 0m
+    );
+    ridesStore[id] = item;
+    return Results.Created($"/api/rides/{id}", item);
+})
+.RequireAuthorization();
+
+app.MapGet("/api/rides/{id}", (string id) =>
+{
+    return ridesStore.TryGetValue(id, out var item)
+        ? Results.Ok(item)
+        : Results.NotFound();
 })
 .RequireAuthorization();
 
