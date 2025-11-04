@@ -6,5 +6,6 @@ public record RideListItem(
     string PickupAddress,
     string DropoffAddress,
     string Status,
-    decimal Price
+    decimal Price,
+    string? VehicleClass = null
 );
